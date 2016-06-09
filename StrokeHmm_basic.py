@@ -20,7 +20,7 @@ class HMM:
                     representing whether the feature is continuous or discrete
                 numVals: a dictionary mapping names of discrete features to
                     the number of values that feature can take on. '''
-        self.states = states 
+        self.states = states
         self.isTrained = False
         self.featureNames = features
         self.featuresCorD = contOrDisc
@@ -37,7 +37,7 @@ class HMM:
         self.isTrained = True
         self.trainPriors( trainingData, trainingLabels )
         self.trainTransitions( trainingData, trainingLabels )
-        self.trainEmissions( trainingData, trainingLabels ) 
+        self.trainEmissions( trainingData, trainingLabels )
         print "HMM trained"
         print "Prior probabilities are:", self.priors
         print "Transition model is:", self.transitions
@@ -55,7 +55,7 @@ class HMM:
         self.priors = {}
         for s in self.states:
             self.priors[s] = float(priorCounts[s])/len(trainingLabels)
-        
+
 
     def trainTransitions( self, trainingData, trainingLabels ):
         ''' Give training data and labels, train the transition model '''
@@ -66,14 +66,14 @@ class HMM:
             transitionCounts[s] = {}
             for s2 in self.states:
                 transitionCounts[s][s2] = 0
-                
+
         for labels in trainingLabels:
             if len(labels) > 1:
                 lab1 = labels[0]
                 for lab2 in labels[1:]:
                     transitionCounts[lab1][lab2] += 1
                     lab1 = lab2
-                    
+
         self.transitions = {}
         for s in transitionCounts.keys():
             self.transitions[s] = {}
@@ -98,7 +98,7 @@ class HMM:
             oneSketchLabels = trainingLabels[i]
             print "One Sketch Features", oneSketchFeatures
             print "One Sketch Labels", oneSketchLabels
-            
+
             for j in range(len(oneSketchFeatures)):
                 features = oneSketchFeatures[j]
                 print "features",features
@@ -127,7 +127,7 @@ class HMM:
                     for i in range(len(self.emissions[s][f])):
                         self.emissions[s][f][i] /= float(len(featureVals[s][f])+self.numVals[f])
 
-              
+
     def label( self, data ):
         ''' Find the most likely labels for the sequence of data
             This is an implementation of the Viterbi algorithm  '''
@@ -140,7 +140,7 @@ class HMM:
             eprob = self.emissions[y][data[0]]
             V[0][y]=self.priors[y]*eprob
             path[y]=[y]
-        	
+
 
         for t in range(1, len(data)):
             V.append({})
@@ -157,7 +157,7 @@ class HMM:
         prob, state = max((V[t][y],y) for y in self.states)
         return path[state]
 
-    
+
     def getEmissionProb( self, state, features ):
         ''' Get P(features|state).
             Consider each feature independent so
@@ -175,7 +175,7 @@ class HMM:
             if self.featuresCorD[f] == DISCRETE:
                 fval = features[f]
                 prob *= self.emissions[state][f][fval]
-                
+
         return prob
 
 
@@ -190,8 +190,8 @@ test.priors = {'sunny':0.63,'rainy':0.2,'cloudy':0.17}
 test.emissions = {'sunny':{'dry':0.6, 'damp':0.15, 'soggy':0.05},
                   'rainy':{'dry':0.05, 'damp':0.35, 'soggy':0.5},
                   'cloudy':{'dry':0.25, 'damp':0.25, 'soggy':0.25}}
-test.transitions = {'sunny':{'sunny':0.5, 'cloudy':0.25, 'rainy':0.25}, 
-                    'rainy':{'sunny':0.125, 'cloudy':0.675, 'rainy':0.375}, 
+test.transitions = {'sunny':{'sunny':0.5, 'cloudy':0.25, 'rainy':0.25},
+                    'rainy':{'sunny':0.125, 'cloudy':0.675, 'rainy':0.375},
                     'cloudy':{'sunny':0.375, 'cloudy':0.125, 'rainy':0.375}}
 
 path = test.label(features)
@@ -202,7 +202,7 @@ print path
 
 
 
-        
+
 
 
 class StrokeLabeler:
@@ -213,7 +213,7 @@ class StrokeLabeler:
         drawingLabels = ['Wire', 'AND', 'OR', 'XOR', 'NAND', 'NOT']
         textLabels = ['Label']
         self.labels = ['drawing', 'text']
-        
+
         self.labelDict = {}
         for l in drawingLabels:
             self.labelDict[l] = 'drawing'
@@ -257,7 +257,7 @@ class StrokeLabeler:
             # to use.  This is an important process and can be tricky.  Try
             # to use a principled approach (i.e., look at the data) rather
             # than just guessing.
-            
+
 
             # l = s.length()
             # if l < 300:
@@ -273,9 +273,9 @@ class StrokeLabeler:
 
 
             ret.append(d)  # append the feature dictionary to the list
-            
+
         return ret
-    
+
     def trainHMM( self, trainingFiles ):
         ''' Train the HMM '''
         self.hmm = HMM( self.labels, self.featureNames, self.contOrDisc, self.numFVals )
@@ -298,8 +298,8 @@ class StrokeLabeler:
         for x in lFileList:
             if not x.startswith('.'):
                 goodList.append(x)
-        
-        tFiles = [ trainingDir + "/" + f for f in goodList ] 
+
+        tFiles = [ trainingDir + "/" + f for f in goodList ]
         self.trainHMM(tFiles)
 
     def featureTest( self, strokeFile ):
@@ -311,7 +311,7 @@ class StrokeLabeler:
             print "Label is", labels[i]
             print "Length is", strokes[i].length()
             print "Curvature is", strokes[i].sumOfCurvature(abs)
-    
+
     def labelFile( self, strokeFile, outFile ):
         ''' Label the strokes in the file strokeFile and save the labels
             (with the strokes) in the outFile '''
@@ -338,7 +338,7 @@ class StrokeLabeler:
         # copy most of the data, including all points, substrokes, strokes
         # then just add the shapes onto the end
         impl =  xml.dom.minidom.getDOMImplementation()
-        
+
         newdoc = impl.createDocument(sketch.namespaceURI, "sketch", sketch.doctype)
         top_element = newdoc.documentElement
 
@@ -356,7 +356,7 @@ class StrokeLabeler:
                 elif child.tagName == "shape":
                     if child.getAttribute("type") == "substroke" or \
                        child.getAttribute("type") == "stroke":
-                        top_element.appendChild(child)    
+                        top_element.appendChild(child)
 
         # Finally, add the new elements for the labels
         for i in range(len(strokes)):
@@ -374,9 +374,9 @@ class StrokeLabeler:
                 ssElem.setAttribute("type", "substroke")
                 ssElem.appendChild(newdoc.createTextNode(ss))
                 newElem.appendChild(ssElem)
-                
+
             top_element.appendChild(newElem)
-            
+
 
         # Write to the file
         filehandle = open(outFile, "w")
@@ -394,7 +394,7 @@ class StrokeLabeler:
         # get the points
         points = sketch.getElementsByTagName("point")
         pointsDict = self.buildDict(points)
-    
+
         # now get the strokes by first getting all shapes
         allShapes = sketch.getElementsByTagName("shape")
         shapesDict = self.buildDict(allShapes)
@@ -428,7 +428,7 @@ class StrokeLabeler:
         for n in nodesWithIdAttrs:
             idAttr = n.getAttribute("id")
             ret[idAttr] = n
-        
+
         return ret
 
     def buildStroke( self, shape, shapesDict, pointDict ):
@@ -445,7 +445,7 @@ class StrokeLabeler:
 
             # Add the substroke id to the stroke object
             ret.addSubstroke(ss.firstChild.data)
-            
+
             # Find the shape with the id of this substroke
             ssShape = shapesDict[ss.firstChild.data]
 
@@ -464,7 +464,7 @@ class StrokeLabeler:
                     last = (x, y, time)
         ret.setPoints(points)
         return ret
-                
+
 
     def loadLabeledFile( self, filename ):
         ''' load the strokes and the labels for the strokes from a labeled file.
@@ -473,7 +473,7 @@ class StrokeLabeler:
         # get the points
         points = sketch.getElementsByTagName("point")
         pointsDict = self.buildDict(points)
-    
+
         # now get the strokes by first getting all shapes
         allShapes = sketch.getElementsByTagName("shape")
         shapesDict = self.buildDict(allShapes)
@@ -511,7 +511,7 @@ class StrokeLabeler:
 
         for stroke in noLabels:
             strokes.remove(stroke)
-            
+
         sketch.unlink()
         if len(strokes) != len(labels):
             print "PROBLEM: number of strokes and labels must match"
@@ -520,17 +520,31 @@ class StrokeLabeler:
 
     def confusion(self, trueLabels, Classifications):
         matrix={}
+        TP = 0
+        FP = 0
+        TN = 0
+        FN = 0
         for s in self.states:
             matrix[s]={}
             for k in self.states:
                 matrix[s][k]=0
         for i in range(0,len(Classifications)):
-            if Classifications[i] == trueLabels[i]:
-                matrix[trueLabel[i]][trueLabel[i]] += 1
+            if trueLabels[i] == self.states[0]:
+                if Classifications[i] == self.states[0]:
+                    TP += 1
+                else:
+                    FN += 1
             else:
-                matrix[trueLabel[i]][Classified[i]] += 1
+                if Classifications[i] == self.states[0]:
+                    FP += 1
+                else:
+                    TN += 1
+        matrix[self.states[0]][self.states[0]] = TP
+        matrix[self.states[0]][self.states[1]] = FN
+        matrix[self.states[1]][self.states[0]] = FP
+        matrix[self.states[1]][self.states[1]] = TN
+        return matrix
 
-        
 
 
 class Stroke:
@@ -539,7 +553,7 @@ class Stroke:
     def __init__(self, strokeId):
         self.strokeId = strokeId
         self.substrokeIds = []   # Keep around the substroke ids for writing back to file
-        
+
     def __repr__(self):
         ''' Return a string representation of the stroke '''
         return "[Stroke " + self.strokeId + "]"
@@ -581,7 +595,7 @@ class Stroke:
         second = self.points[0]
         third = self.points[1*skip]
         for p in self.points[2*skip::skip]:
-            
+
             first = second
             second = third
             third = p
@@ -589,7 +603,7 @@ class Stroke:
             ay = second[1] - first[1]
             bx = third[0] - second[0]
             by = third[1] - second[1]
-            
+
             lena = math.sqrt(ax**2 + ay**2)
             lenb = math.sqrt(bx**2 + by**2)
 
@@ -619,5 +633,3 @@ class Stroke:
 
 
     # You can (and should) define more features here
-
-
