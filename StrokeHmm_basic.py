@@ -138,7 +138,7 @@ class HMM:
         path = {}
 
         for y in self.states:
-        	eprob=self.getEmissionProb(y,feature_dic[0][0])
+        	eprob=self.getEmissionProb(y,feature_dic[0])
         	V[0][y]=self.priors[y]*eprob
         	path[y]=[y]
 
@@ -147,7 +147,7 @@ class HMM:
         	newpath = {}
 
         	for y in self.states:
-        		eprob2 = self.getEmissionProb(y,feature_dic[0][t])
+        		eprob2 = self.getEmissionProb(y,feature_dic[t])
         		prob, state = max((V[t-1][k] * self.transitions[k][y] * eprob2, k) for k in self.states)
         		V[t][y] = prob
         		newpath[y] = path[state] + [y]
