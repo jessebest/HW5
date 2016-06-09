@@ -151,7 +151,7 @@ class HMM:
         		prob, state = max((V[t-1][k] * self.transitions[k][y] * eprob2, k) for k in self.states)
         		V[t][y] = prob
         		newpath[y] = path[state] + [y]
-        		path = newpath
+        	path = newpath
 
         prob, state = max((V[t][y],y) for y in self.states)
         return path[state]
