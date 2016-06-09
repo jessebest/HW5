@@ -5,8 +5,8 @@ import math
 import os
 
 # A couple contants
-CONTINUOUS = 0
-DISCRETE = 1
+CONTINUOUS = 1
+DISCRETE = 0
 
 class HMM:
     ''' Code for a hidden Markov Model '''
@@ -132,26 +132,27 @@ class HMM:
         ''' Find the most likely labels for the sequence of data
             This is an implementation of the Viterbi algorithm  '''
         # You will implement this function
-        strokes = data[0]
-        labels = data[1]
-        feature_dic=self.featurefy(strokes)
         path = {}
+        V = [{}]
 
         for y in self.states:
-        	eprob=self.getEmissionProb(y,feature_dic[0])
-        	V[0][y]=self.priors[y]*eprob
-        	path[y]=[y]
+        #eprob=self.getEmissionProb(y,data[0])
+            eprob = self.emissions[y][data[0]]
+            V[0][y]=self.priors[y]*eprob
+            path[y]=[y]
+        	
 
         for t in range(1, len(data)):
-        	V.append({})
-        	newpath = {}
+            V.append({})
+            newpath = {}
 
-        	for y in self.states:
-        		eprob2 = self.getEmissionProb(y,feature_dic[t])
-        		prob, state = max((V[t-1][k] * self.transitions[k][y] * eprob2, k) for k in self.states)
-        		V[t][y] = prob
-        		newpath[y] = path[state] + [y]
-        	path = newpath
+            for y in self.states:
+                #eprob2 = self.getEmissionProb(y,data[t])
+                eprob2 = self.emissions[y][data[t]]
+                prob, state = max((V[t-1][k] * self.transitions[k][y] * eprob2, k) for k in self.states)
+                V[t][y] = prob
+                newpath[y] = path[state] + [y]
+            path = newpath
 
         prob, state = max((V[t][y],y) for y in self.states)
         return path[state]
@@ -180,6 +181,21 @@ class HMM:
 
 
 
+# a simple example
+
+states = ['sunny','rainy','cloudy']
+features = ['dry','damp','soggy']
+test = HMM(states, features, DISCRETE, None)
+test.priors = {'sunny':0.63,'rainy':0.2,'cloudy':0.17}
+test.emissions = {'sunny':{'dry':0.6, 'damp':0.15, 'soggy':0.05},
+                  'rainy':{'dry':0.05, 'damp':0.35, 'soggy':0.5},
+                  'cloudy':{'dry':0.25, 'damp':0.25, 'soggy':0.25}}
+test.transitions = {'sunny':{'sunny':0.5, 'cloudy':0.25, 'rainy':0.25}, 
+                    'rainy':{'sunny':0.125, 'cloudy':0.675, 'rainy':0.375}, 
+                    'cloudy':{'sunny':0.375, 'cloudy':0.125, 'rainy':0.375}}
+
+path = test.label(features)
+print path
 
 
 
@@ -213,8 +229,8 @@ class StrokeLabeler:
         # numFVals is a dictionary specifying the number of legal values for
         #    each discrete feature
         self.featureNames = ['length']
-        self.contOrDisc = {'length': DISCRETE}
-        self.numFVals = { 'length': 2}
+        self.contOrDisc = {'length': CONTINUOUS}
+        #self.numFVals = { 'length': 2}
 
     def featurefy( self, strokes ):
         ''' Converts the list of strokes into a list of feature dictionaries
@@ -227,7 +243,7 @@ class StrokeLabeler:
 
             # If we wanted to use length as a continuous feature, we
             # would simply use the following line to set its value
-            #d['length'] = s.length()
+            d['length'] = s.length()
 
             # To use it as a discrete feature, we have to "bin" it, that is
             # we define ranges for "short" (<300 units) and "long" (>=300 units)
@@ -241,11 +257,13 @@ class StrokeLabeler:
             # to use.  This is an important process and can be tricky.  Try
             # to use a principled approach (i.e., look at the data) rather
             # than just guessing.
-            l = s.length()
-            if l < 300:
-                d['length'] = 0
-            else:
-                d['length'] = 1
+            
+
+            # l = s.length()
+            # if l < 300:
+            #     d['length'] = 0
+            # else:
+            #     d['length'] = 1
 
             # We can add more features here just by adding them to the dictionary
             # d as we did with length.  Remember that when you add features,
@@ -271,7 +289,7 @@ class StrokeLabeler:
         allObservations = [self.featurefy(s) for s in allStrokes]
         self.hmm.train(allObservations, allLabels)
 
-    def trainHMMDir( self, trainingDir )
+    def trainHMMDir( self, trainingDir ):
         ''' train the HMM on all the files in a training directory '''
         for fFileObj in os.walk(trainingDir):
             lFileList = fFileObj[2]
@@ -507,7 +525,7 @@ class StrokeLabeler:
             for k in self.states:
                 matrix[s][k]=0
         for i in range(0,len(Classifications)):
-            if Classifications[i] = trueLabels[i]: 
+            if Classifications[i] == trueLabels[i]:
                 matrix[trueLabel[i]][trueLabel[i]] += 1
             else:
                 matrix[trueLabel[i]][Classified[i]] += 1
